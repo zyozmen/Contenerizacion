@@ -1,6 +1,7 @@
 package com.zyozmen.products.domain.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -9,31 +10,46 @@ import java.util.Objects;
  */
 public class Producto {
 
-    private Long id;
+    private Integer id;
+    private String codigoBarras;
     private String nombre;
-    private String descripcion;
-    private BigDecimal precio;
+    private LocalDate fechaIngreso;
+    private Boolean aplicaIva;
+    private BigDecimal precioBase;
+    private String descripcionLarga;
 
     public Producto() {
     }
 
-    public Producto(Long id, String nombre, String descripcion, BigDecimal precio) {
+    public Producto(Integer id, String codigoBarras, String nombre, LocalDate fechaIngreso,
+                    Boolean aplicaIva, BigDecimal precioBase, String descripcionLarga) {
         this.id = id;
+        this.codigoBarras = codigoBarras;
         this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.precio = precio;
+        this.fechaIngreso = fechaIngreso;
+        this.aplicaIva = aplicaIva;
+        this.precioBase = precioBase;
+        this.descripcionLarga = descripcionLarga;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getCodigoBarras() {
+        return codigoBarras;
+    }
+
+    public void setCodigoBarras(String codigoBarras) {
+        this.codigoBarras = codigoBarras;
     }
 
     public String getNombre() {
@@ -44,20 +60,36 @@ public class Producto {
         this.nombre = nombre;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public LocalDate getFechaIngreso() {
+        return fechaIngreso;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setFechaIngreso(LocalDate fechaIngreso) {
+        this.fechaIngreso = fechaIngreso;
     }
 
-    public BigDecimal getPrecio() {
-        return precio;
+    public Boolean getAplicaIva() {
+        return aplicaIva;
     }
 
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
+    public void setAplicaIva(Boolean aplicaIva) {
+        this.aplicaIva = aplicaIva;
+    }
+
+    public BigDecimal getPrecioBase() {
+        return precioBase;
+    }
+
+    public void setPrecioBase(BigDecimal precioBase) {
+        this.precioBase = precioBase;
+    }
+
+    public String getDescripcionLarga() {
+        return descripcionLarga;
+    }
+
+    public void setDescripcionLarga(String descripcionLarga) {
+        this.descripcionLarga = descripcionLarga;
     }
 
     @Override
@@ -70,35 +102,49 @@ public class Producto {
         }
         Producto producto = (Producto) o;
         return Objects.equals(id, producto.id)
+                && Objects.equals(codigoBarras, producto.codigoBarras)
                 && Objects.equals(nombre, producto.nombre)
-                && Objects.equals(descripcion, producto.descripcion)
-                && Objects.equals(precio, producto.precio);
+                && Objects.equals(fechaIngreso, producto.fechaIngreso)
+                && Objects.equals(aplicaIva, producto.aplicaIva)
+                && Objects.equals(precioBase, producto.precioBase)
+                && Objects.equals(descripcionLarga, producto.descripcionLarga);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nombre, descripcion, precio);
+        return Objects.hash(id, codigoBarras, nombre, fechaIngreso, aplicaIva, precioBase, descripcionLarga);
     }
 
     @Override
     public String toString() {
         return "Producto{" +
                 "id=" + id +
+            ", codigoBarras='" + codigoBarras + '\'' +
                 ", nombre='" + nombre + '\'' +
-                ", descripcion='" + descripcion + '\'' +
-                ", precio=" + precio +
+            ", fechaIngreso=" + fechaIngreso +
+            ", aplicaIva=" + aplicaIva +
+            ", precioBase=" + precioBase +
+            ", descripcionLarga='" + descripcionLarga + '\'' +
                 '}';
     }
 
     public static class Builder {
 
-        private Long id;
+        private Integer id;
+        private String codigoBarras;
         private String nombre;
-        private String descripcion;
-        private BigDecimal precio;
+        private LocalDate fechaIngreso;
+        private Boolean aplicaIva;
+        private BigDecimal precioBase;
+        private String descripcionLarga;
 
-        public Builder id(Long id) {
+        public Builder id(Integer id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder codigoBarras(String codigoBarras) {
+            this.codigoBarras = codigoBarras;
             return this;
         }
 
@@ -107,18 +153,28 @@ public class Producto {
             return this;
         }
 
-        public Builder descripcion(String descripcion) {
-            this.descripcion = descripcion;
+        public Builder fechaIngreso(LocalDate fechaIngreso) {
+            this.fechaIngreso = fechaIngreso;
             return this;
         }
 
-        public Builder precio(BigDecimal precio) {
-            this.precio = precio;
+        public Builder aplicaIva(Boolean aplicaIva) {
+            this.aplicaIva = aplicaIva;
+            return this;
+        }
+
+        public Builder precioBase(BigDecimal precioBase) {
+            this.precioBase = precioBase;
+            return this;
+        }
+
+        public Builder descripcionLarga(String descripcionLarga) {
+            this.descripcionLarga = descripcionLarga;
             return this;
         }
 
         public Producto build() {
-            return new Producto(id, nombre, descripcion, precio);
+            return new Producto(id, codigoBarras, nombre, fechaIngreso, aplicaIva, precioBase, descripcionLarga);
         }
     }
 }

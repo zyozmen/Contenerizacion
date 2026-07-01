@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: products-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: products_db
+      MYSQL_USER: USR_PRD_1
+      MYSQL_PASSWORD: USR_PSW_SCTR
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  products-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: products-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: products_db
+      DB_USERNAME: USR_PRD_1
+      DB_PASSWORD: USR_PSW_SCTR
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

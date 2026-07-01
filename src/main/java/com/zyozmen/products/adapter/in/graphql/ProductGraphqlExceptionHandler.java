@@ -5,7 +5,6 @@ import com.zyozmen.products.domain.exception.ServiceUnavailableException;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.graphql.data.method.annotation.GraphQlExceptionHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,18 +30,6 @@ public class ProductGraphqlExceptionHandler {
     public GraphQLError handleServiceUnavailable(ServiceUnavailableException ex, DataFetchingEnvironment env) {
         return GraphqlErrorBuilder.newError(env)
                 .message(ex.getMessage())
-                .extensions(Map.of(
-                        "code", "SERVICE_UNAVAILABLE",
-                        "status", 503,
-                        "error", "Service Unavailable"
-                ))
-                .build();
-    }
-
-    @GraphQlExceptionHandler(CallNotPermittedException.class)
-    public GraphQLError handleCallNotPermitted(CallNotPermittedException ex, DataFetchingEnvironment env) {
-        return GraphqlErrorBuilder.newError(env)
-                .message("El servicio no está disponible temporalmente. El circuit breaker está abierto.")
                 .extensions(Map.of(
                         "code", "SERVICE_UNAVAILABLE",
                         "status", 503,

@@ -49,9 +49,12 @@ public class ProductoService implements ProductoUseCase {
         Producto existente = productoRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Producto no encontrado con ID: " + id));
+        existente.setCodigoBarras(producto.getCodigoBarras());
         existente.setNombre(producto.getNombre());
-        existente.setDescripcion(producto.getDescripcion());
-        existente.setPrecio(producto.getPrecio());
+        existente.setFechaIngreso(producto.getFechaIngreso());
+        existente.setAplicaIva(producto.getAplicaIva());
+        existente.setPrecioBase(producto.getPrecioBase());
+        existente.setDescripcionLarga(producto.getDescripcionLarga());
         return productoRepositoryPort.save(existente);
     }
 

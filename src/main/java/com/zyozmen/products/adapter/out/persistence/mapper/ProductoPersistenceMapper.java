@@ -14,18 +14,24 @@ public class ProductoPersistenceMapper {
     public Producto toDomain(ProductoJpaEntity entity) {
         return Producto.builder()
                 .id(entity.getId())
+                .codigoBarras(entity.getCodigoBarras())
                 .nombre(entity.getNombre())
-                .descripcion(entity.getDescripcion())
-                .precio(entity.getPrecio())
+                .fechaIngreso(entity.getFechaIngreso())
+                .aplicaIva(entity.getAplicaIva())
+                .precioBase(entity.getPrecioBase())
+                .descripcionLarga(entity.getDescripcionLarga())
                 .build();
     }
 
     public ProductoJpaEntity toEntity(Producto domain) {
         return ProductoJpaEntity.builder()
                 .id(domain.getId())
+                .codigoBarras(domain.getCodigoBarras())
                 .nombre(domain.getNombre())
-                .descripcion(domain.getDescripcion())
-                .precio(domain.getPrecio())
+                .fechaIngreso(domain.getFechaIngreso())
+                .aplicaIva(domain.getAplicaIva())
+                .precioBase(domain.getPrecioBase())
+                .descripcionLarga(domain.getDescripcionLarga())
                 .build();
     }
 }

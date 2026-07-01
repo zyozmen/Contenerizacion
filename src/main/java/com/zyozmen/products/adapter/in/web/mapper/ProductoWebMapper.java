@@ -15,18 +15,25 @@ public class ProductoWebMapper {
 
     public Producto toDomain(ProductoRequestDTO dto) {
         return Producto.builder()
+                .id(dto.getId())
+                .codigoBarras(dto.getCodigoBarras())
                 .nombre(dto.getNombre())
-                .descripcion(dto.getDescripcion())
-                .precio(dto.getPrecio())
+                .fechaIngreso(dto.getFechaIngreso())
+                .aplicaIva(dto.getAplicaIva())
+                .precioBase(dto.getPrecioBase())
+                .descripcionLarga(dto.getDescripcionLarga())
                 .build();
     }
 
     public ProductoResponseDTO toResponseDTO(Producto producto) {
         return ProductoResponseDTO.builder()
                 .id(producto.getId())
+                .codigoBarras(producto.getCodigoBarras())
                 .nombre(producto.getNombre())
-                .descripcion(producto.getDescripcion())
-                .precio(producto.getPrecio())
+                .fechaIngreso(producto.getFechaIngreso())
+                .aplicaIva(producto.getAplicaIva())
+                .precioBase(producto.getPrecioBase())
+                .descripcionLarga(producto.getDescripcionLarga())
                 .build();
     }
 }

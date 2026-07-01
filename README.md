@@ -1,9 +1,9 @@
 # Products API
 
 ## 1. Resumen del proyecto
-Este proyecto implementa un microservicio REST para la gestión de productos (CRUD: crear, consultar, actualizar y eliminar), desarrollado como ejercicio académico con enfoque en arquitectura limpia (hexagonal), buenas prácticas de validación y resiliencia.
+Este proyecto implementa un microservicio para la gestión de productos y movimientos, desarrollado como ejercicio académico con enfoque en arquitectura hexagonal, validación y manejo centralizado de errores.
 
-El sistema expone una API HTTP documentada con OpenAPI/Swagger y utiliza una base de datos MySQL para persistencia.
+El sistema expone APIs HTTP documentadas con OpenAPI/Swagger, una API GraphQL para productos y utiliza una base de datos MySQL para persistencia.
 
 ## 2. Objetivo académico
 El propósito del proyecto es evidenciar la aplicación integrada de los siguientes conceptos:
@@ -13,9 +13,9 @@ El propósito del proyecto es evidenciar la aplicación integrada de los siguien
 - Desarrollo de APIs REST con Spring Boot.
 - Persistencia relacional con JPA/Hibernate.
 - Validación de datos de entrada.
-- Mecanismos de tolerancia a fallos (Circuit Breaker y Retry).
 - Documentación técnica de API con OpenAPI.
 - Pruebas unitarias/integración con el ecosistema de Spring Test.
+- Exposición de endpoints REST y GraphQL.
 
 ## 3. Stack tecnológico utilizado
 ### 3.1 Lenguaje y plataforma
@@ -29,10 +29,9 @@ El propósito del proyecto es evidenciar la aplicación integrada de los siguien
 - spring-boot-starter-validation: validación con Jakarta Validation.
 - mysql-connector-j: conector JDBC para MySQL.
 - springdoc-openapi-starter-webmvc-ui 2.5.0: documentación OpenAPI y Swagger UI.
-- spring-boot-starter-actuator: endpoints operativos/observabilidad.
-- resilience4j-spring-boot3 2.2.0: Circuit Breaker y Retry.
+- spring-boot-starter-graphql: exposición de operaciones GraphQL.
+- spring-graphql-test: utilidades para pruebas GraphQL.
 - Lombok: reducción de código boilerplate.
-- spring-boot-starter-test: pruebas con JUnit 5 y Mockito.
 
 ### 3.3 Base de datos
 - MySQL 8
@@ -41,11 +40,11 @@ El propósito del proyecto es evidenciar la aplicación integrada de los siguien
 ## 4. Arquitectura del proyecto
 La organización del código responde a una arquitectura hexagonal:
 
-- Capa de dominio (domain): entidades/modelos, puertos y excepciones del negocio.
+- Capa de dominio (domain): entidades/modelos, puertos de entrada y salida, y excepciones del negocio.
 - Capa de aplicación (application): casos de uso y servicios de aplicación.
-- Adaptadores de entrada (adapter.in): API REST, DTOs y mapeadores web.
-- Adaptadores de salida (adapter.out): persistencia y mapeadores hacia infraestructura.
-- Configuración transversal (config/exception): OpenAPI, manejo global de errores y aspectos no funcionales.
+- Adaptadores de entrada (adapter.in): API REST, API GraphQL, DTOs y mapeadores web.
+- Adaptadores de salida (adapter.out): persistencia JPA, entidades, repositorios y mapeadores hacia infraestructura.
+- Configuración transversal (config/exception): OpenAPI y manejo global de errores.
 
 Esta estructura favorece desacoplamiento, mantenibilidad y testabilidad.
 
@@ -62,8 +61,8 @@ La aplicación usa variables de entorno con valores por defecto definidos en app
 - DB_HOST (default: 127.0.0.1)
 - DB_PORT (default: 3306)
 - DB_NAME (default: products_db)
-- DB_USERNAME (default: USR_PRD_1)
-- DB_PASSWORD (default: USR_PSW_SCTR)
+- DB_USERNAME (default: root)
+- DB_PASSWORD (default: root)
 
 Ejemplo en PowerShell (opcional, si desea sobrescribir defaults):
 
@@ -71,8 +70,8 @@ Ejemplo en PowerShell (opcional, si desea sobrescribir defaults):
 $env:DB_HOST="127.0.0.1"
 $env:DB_PORT="3306"
 $env:DB_NAME="products_db"
-$env:DB_USERNAME="USR_PRD_1"
-$env:DB_PASSWORD="USR_PSW_SCTR"
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="root"
 ```
 
 Nota: con la configuración actual, Hibernate utiliza ddl-auto=update, por lo que el esquema se ajusta automáticamente según el modelo.
@@ -127,7 +126,9 @@ La API queda disponible en:
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - OpenAPI JSON: http://localhost:8080/v3/api-docs
 
-### 8.3 Endpoints principales (CRUD)
+- GraphiQL: http://localhost:8080/graphiql
+
+### 8.3 API REST de productos
 Base path: /api/productos
 
 1. Listar productos
@@ -169,7 +170,85 @@ Content-Type: application/json
 DELETE /api/productos/{id}
 ```
 
-### 8.4 Ejemplos con curl
+### 8.4 API REST de movimientos
+Base path: /api/movimientos
+
+1. Listar movimientos
+```http
+GET /api/movimientos
+```
+
+2. Obtener movimiento por ID
+```http
+GET /api/movimientos/{id}
+```
+
+3. Crear movimiento
+```http
+POST /api/movimientos
+Content-Type: application/json
+
+{
+  "productoId": 1,
+  "fechaHora": "2026-06-30T10:30:00",
+  "cantidad": 10,
+  "pesoEmpaqueKg": 0.45,
+  "margenGanancia": 0.20,
+  "imagenEvidencia": "https://example.com/evidencia.jpg"
+}
+```
+
+4. Actualizar movimiento
+```http
+PUT /api/movimientos/{id}
+Content-Type: application/json
+
+{
+  "productoId": 1,
+  "fechaHora": "2026-06-30T12:00:00",
+  "cantidad": 12,
+  "pesoEmpaqueKg": 0.50,
+  "margenGanancia": 0.25,
+  "imagenEvidencia": "https://example.com/evidencia-actualizada.jpg"
+}
+```
+
+5. Eliminar movimiento
+```http
+DELETE /api/movimientos/{id}
+```
+
+### 8.5 API GraphQL de productos
+Ruta: /graphql
+
+Consulta de ejemplo:
+```graphql
+query {
+  listarTodos {
+    id
+    nombre
+    descripcion
+    precio
+  }
+}
+```
+
+Mutación de ejemplo:
+```graphql
+mutation {
+  crear(input: {
+    nombre: "Mouse Inalámbrico"
+    descripcion: "Bluetooth, recargable"
+    precio: 59.9
+  }) {
+    id
+    nombre
+    precio
+  }
+}
+```
+
+### 8.6 Ejemplos con curl
 Crear:
 ```bash
 curl -X POST "http://localhost:8080/api/productos" \
@@ -182,37 +261,24 @@ Listar:
 curl "http://localhost:8080/api/productos"
 ```
 
-## 9. Observabilidad y resiliencia
-### 9.1 Actuator
-Endpoints expuestos:
-- /actuator/health
-- /actuator/info
-- /actuator/circuitbreakers
-- /actuator/retries
-
-### 9.2 Resilience4j
-Se implementan políticas de:
-- Circuit Breaker para el componente de repositorio de productos.
-- Retry ante fallos transitorios de infraestructura.
-
-Esto permite una degradación controlada del servicio cuando existen fallas temporales de conectividad o acceso a datos.
-
-## 10. Manejo de errores
+## 9. Manejo de errores
 La API cuenta con un manejador global de excepciones que normaliza respuestas HTTP para casos como:
 
 - Recurso no encontrado (404).
 - Errores de validación de entrada (400).
-- Servicio no disponible por resiliencia/infraestructura (503).
+- Servicio no disponible (503).
 - Errores no controlados (500).
 
-## 11. Estructura general del repositorio
+En GraphQL, los mismos casos se traducen a errores con extensiones estructuradas para conservar el código y el tipo de fallo.
+
+## 10. Estructura general del repositorio
 - pom.xml: definición del proyecto Maven y dependencias.
 - src/main/java: código fuente principal.
 - src/main/resources/application.properties: configuración de aplicación.
 - src/test/java: pruebas.
 - target/: artefactos y reportes generados por Maven.
 
-## 12. Conclusión
-El proyecto Products API constituye una implementación académica completa de un microservicio CRUD empresarial, integrando prácticas modernas de ingeniería de software en Java: arquitectura desacoplada, documentación automática, validaciones robustas, pruebas y mecanismos de resiliencia.
+## 11. Conclusión
+El proyecto Products API constituye una implementación académica completa de un microservicio para gestión de productos y movimientos, integrando prácticas modernas de ingeniería de software en Java: arquitectura desacoplada, documentación automática, validaciones robustas, pruebas y exposición tanto REST como GraphQL.
 
-Como resultado, el sistema no solo cumple con el objetivo funcional de gestión de productos, sino que también ofrece una base sólida para evolución, mantenimiento y despliegue en entornos reales.
+Como resultado, el sistema no solo cumple con el objetivo funcional de gestión, sino que también ofrece una base sólida para evolución, mantenimiento y despliegue en entornos reales.
